@@ -15,11 +15,12 @@ export default function App() {
   const [loading, setLoading] = useState(false);
   const [res, setRes] = useState({});
 
-  async function getTags() {
+  async function makeRequest(url) {
     if (!image) return;
 
     setLoading(true)
-    fetch(`http://localhost:4000/fetch/${BASE_URL}/tags?image_url=${image}`, {
+    setRes({})
+    fetch(url, {
       method: 'GET',
       withCredentials: true,
       headers: {
@@ -38,8 +39,16 @@ export default function App() {
       setLoading(false)
     });
   }
-  function getColors() {}
-  function getFaces() {}
+
+  function getTags() {
+    makeRequest(`http://localhost:4000/fetch/${BASE_URL}/tags?image_url=${image}`)
+  }
+  function getColors() {
+    makeRequest(`http://localhost:4000/fetch/${BASE_URL}/colors?image_url=${image}`)
+  }
+  function getFaces() {
+    makeRequest(`http://localhost:4000/fetch/${BASE_URL}/faces/detections?image_url=${image}`)
+  }
 
   function handleButtonClick(type) {
     switch (type) {
