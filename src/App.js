@@ -1,28 +1,74 @@
-import React, { useRef, useState } from 'react';
+import React, { useState } from 'react';
+import ReactJson from 'react-json-view'
+
+import { API_KEY, API_SECRET, BASIC_AUTH_TOKEN } from './env'
 
 import './styles.css';
 
+const BASE_URL = 'https://api.imagga.com/v2'
+const TAGS = 'tags'
+const COLORS = 'colors'
+const FACES = 'faces'
+
 export default function App() {
-  const fileRef = useRef(null);
   const [image, setImage] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [res, setRes] = useState({});
 
-  function handleInputFileChange(e) {
-    if (!e.currentTarget.files || e.currentTarget.files.length === 0) return;
+  async function getTags() {
+    if (!image) return;
 
-    const selectedFile = e.currentTarget.files[0];
-    const fileReader = new FileReader();
-    fileReader.readAsDataURL(selectedFile);
-    fileReader.onload = () => {
-       const imageRead = new Image();
+    setLoading(true)
+    fetch(`http://localhost:4000/fetch/${BASE_URL}/tags?image_url=${image}`, {
+      method: 'GET',
+      withCredentials: true,
+      headers: {
+        accept: 'application/json',
+        user: `${API_KEY}:${API_SECRET}`,
+        authorization: `Basic ${BASIC_AUTH_TOKEN}`
+      }  
+    })
+    .then(response => response.json())
+    .then(response => {
+      setRes(response);
+      setLoading(false);
+    })
+    .catch(e => {
+      console.log(e)
+      setLoading(false)
+    });
+  }
+  function getColors() {}
+  function getFaces() {}
 
-       const base64File = fileReader.result;
-       imageRead.src = base64File;
+  function handleButtonClick(type) {
+    switch (type) {
+      case TAGS:
+        getTags()
+        break;
+      case COLORS:
+        getColors()
+        break;
+      case FACES:
+        getFaces()
+        break;
+      default:
+        break;
+    }
+  }
 
-       imageRead.onload = () => {
-          setImage(base64File);
-          fileRef.current.value = '';
-       };
-    };
+  if (loading) return <h1 style={{ margin: 'auto' }}>carregando...</h1>
+
+  function renderImage() {
+    if (!image) return <h2 style={{ margin: 'auto' }}>Submeta uma imagem para análise</h2>
+
+    return <img src={image} alt="uploaded" />
+  }
+
+  function renderResponse() {
+    if (!res || Object.keys(res).length <= 0) return null;
+    
+    return <ReactJson src={res} />
   }
 
   return (
@@ -30,24 +76,23 @@ export default function App() {
       <h1 style={{ margin: 'auto' }}>
         Exemplo de consumo de APIs de visão computacional
       </h1>
-      <input
-        type="file"
-        ref={fileRef}
-        onChange={handleInputFileChange}
-        hidden
-      />
-      <button
-        style={{ maxWidth: '20%', margin: 'auto' }}
-        onClick={() => fileRef.current.click()}
-      >
-        Submeter imagem
-      </button>
+      
       <div className="buttons">
-        <button>tags</button>
-        <button>cores predominantes</button>
-        <button>rostos</button>
+        <input placeholder="url de imagem" type="text" onChange={e => setImage(e.target.value)} />
       </div>
-      <img src={image} alt="uploaded" />
+      <div className="buttons">
+        <button onClick={() => handleButtonClick(TAGS)}>
+          tags
+        </button>
+        <button onClick={() => handleButtonClick(COLORS)}>
+          cores predominantes
+        </button>
+        <button onClick={() => handleButtonClick(FACES)}>
+          rostos
+        </button>
+      </div>
+      {renderImage()}
+      {renderResponse()}
     </div>
   );
 }

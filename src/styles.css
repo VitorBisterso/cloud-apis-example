@@ -2,6 +2,7 @@
    --color-blue: #4281A4;
    --color-green: #48A9A6;
    margin: 5vh;
+   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
 .container {
@@ -43,6 +44,8 @@ img {
    object-fit: cover;
 }
 
-h1 {
-   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+input {
+   padding: 16px 24px;
+   border: 1px solid var(--color-blue);
+   border-radius: 5px;
 }
